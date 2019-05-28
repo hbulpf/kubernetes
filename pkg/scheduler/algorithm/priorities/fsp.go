@@ -30,21 +30,22 @@ func init() {
 	fmt.Println("FSP start to init...")
 
 	//随机初始化值
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed((time.Now().UnixNano() / 100) % 100)
 	X[0] = rand.Float64()*2 - 1
 	X[1] = rand.Float64()*2 - 1
 	V[0] = rand.Float64()
 	V[1] = rand.Float64()
 
 	fspFitnessFunc()
-	fmt.Println("---初始化当前个体极值，并找到群体极值---")
+	// fmt.Println("---初始化当前个体极值，并找到群体极值---")
 	for i := 0; i < N; i++ {
 		PBest[i] = Y[i]
 		if Y[i] > GBest {
 			GBest = Y[i]
 		}
 	}
-	fmt.Println("start GBest: ", GBest)
+	fmt.Printf("start \n GBest:%f \n X[0]:%f \n X[1]:%f \n V[0]:%f \n V[1]:%f\n",
+		GBest, X[0], X[1], V[0], V[1])
 }
 
 //适应度函数
@@ -87,7 +88,7 @@ func CalFspPSO(maxEpoch int) (res float64) {
 			if spow2 > penalty {
 				R = (spow2 - penalty*penalty) * u / penalty //计算惩罚项
 			}
-			rand.Seed(time.Now().UnixNano())
+			rand.Seed((time.Now().UnixNano() / 100) % 100)
 			V[j] = w*V[j] + C1*rand.Float64()*(PBest[j]-X[j]) + C2*rand.Float64()*(GBest-X[j]) + R
 			if V[j] < VMax {
 				V[j] = VMax
