@@ -5,6 +5,9 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	schedulerapi "k8s.io/kubernetes/pkg/scheduler/api"
+	schedulernodeinfo "k8s.io/kubernetes/pkg/scheduler/nodeinfo"
 )
 
 const N int = 2 //粒子个数，为方便演示，只取两个，观察其运动方向
@@ -119,4 +122,19 @@ func CalFspPSO(maxEpoch int) (res float64) {
 	}
 	res = GBest
 	return
+}
+
+func fspScorer(requested, allocable *schedulernodeinfo.Resource, includeVolumes bool, requestedVolumes int, allocatableVolumes int) int64 {
+	return 0
+}
+
+func fspScore(requested, capacity int64) int64 {
+	if capacity == 0 {
+		return 0
+	}
+	if requested > capacity {
+		return 0
+	}
+
+	return (requested * schedulerapi.MaxPriority) / capacity
 }
