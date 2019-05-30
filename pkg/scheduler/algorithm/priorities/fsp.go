@@ -5,9 +5,6 @@ import (
 	"math"
 	"math/rand"
 	"time"
-
-	schedulerapi "k8s.io/kubernetes/pkg/scheduler/api"
-	schedulernodeinfo "k8s.io/kubernetes/pkg/scheduler/nodeinfo"
 )
 
 const N int = 2 //粒子个数，为方便演示，只取两个，观察其运动方向
@@ -17,6 +14,9 @@ var (
 	C1min       float64    = 0.01                           //个体学习因子最大值
 	C2max       float64    = 2.5                            //群体学习因子最大值
 	C2min       float64    = 0.01                           //群体学习因子最小值
+	Wmax        float64    = 0.9                            //惯性权重参数最大值
+	Wmin        float64    = 0.4                            //惯性权重参数最小值
+	Theta       float64    = 0.4                            //惯性权重控制因子
 	X           [N]float64                                  //粒子位置
 	Y           [N]float64                                  //适应度值
 	V           [N]float64                                  //粒子运行速度
@@ -82,7 +82,7 @@ func CalFspPSO(maxEpoch int) (res float64) {
 	tmaxpow := float64(maxEpoch * maxEpoch)
 	for i := 1; i <= maxEpoch; i++ {
 		// fmt.Printf("\n\n======%d======", i)
-		w := 0.5
+		w := Wmin + (Wmax-Wmin)*math.Exp(-Theta*float64(i*i)/tmaxpow)
 		for j := 0; j < N; j++ {
 			C1 := C1max - (C1max-C1min)*float64(i*i)/tmaxpow //计算C1
 			C2 := C2min + (C2max-C2min)*float64(i*i)/tmaxpow //计算C1
@@ -122,19 +122,4 @@ func CalFspPSO(maxEpoch int) (res float64) {
 	}
 	res = GBest
 	return
-}
-
-func fspScorer(requested, allocable *schedulernodeinfo.Resource, includeVolumes bool, requestedVolumes int, allocatableVolumes int) int64 {
-	return 0
-}
-
-func fspScore(requested, capacity int64) int64 {
-	if capacity == 0 {
-		return 0
-	}
-	if requested > capacity {
-		return 0
-	}
-
-	return (requested * schedulerapi.MaxPriority) / capacity
 }
